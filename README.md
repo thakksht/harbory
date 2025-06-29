@@ -7,8 +7,10 @@ Harbory is a cross-platform Docker management tool built with Go and React. It p
 - 📦 **Container Management**: View, start, stop, and remove containers
 - 🖼️ **Image Management**: Browse, pull, delete, and inspect Docker images
 - 📊 **System Information**: Monitor Docker system resources and performance
-- 🔒 **Secure API**: Communication between frontend and backend using RESTful API
+- � **Real-time Updates**: Stream container logs and image pull progress via WebSockets
+- �🔒 **Secure API**: Communication between frontend and backend using RESTful API
 - 🌐 **Web Interface**: Modern and responsive UI built with React
+- 🧱 **Clean Architecture**: Layered design with separation of concerns (API, service, repository)
 
 ## Architecture
 
@@ -20,8 +22,8 @@ Harbory consists of three main components:
 
 ## Prerequisites
 
-- [Docker](https://www.docker.com/get-started) (v20.10.0+)
-- [Docker Compose](https://docs.docker.com/compose/install/) (v2.0.0+)
+- [Docker](https://www.docker.com/get-started) (v24.0.0+)
+- [Docker Compose](https://docs.docker.com/compose/install/) (v2.20.0+)
 
 ## Getting Started
 
@@ -49,7 +51,7 @@ docker-compose up -d
 ```bash
 cd harbory-backend
 go mod tidy
-go run main.go
+go run ./cmd/harbory/main.go
 ```
 
 The backend server will be available at [http://localhost:8080](http://localhost:8080)
@@ -64,6 +66,13 @@ npm run dev
 
 The development server will be available at [http://localhost:3000](http://localhost:3000)
 
+#### WebSocket Demos
+
+Two standalone HTML files are included in the project root for demonstrating WebSocket functionality:
+
+- To test container logs streaming: open `index.html` in a browser
+- To test image pulling: open `pullimage.html` in a browser
+
 ## API Endpoints
 
 ### REST Endpoints
@@ -75,6 +84,7 @@ The development server will be available at [http://localhost:3000](http://local
 | POST   | `/api/containers/{id}/stop` | Stop a container |
 | DELETE | `/api/containers/{id}/delete` | Delete a container (with force option) |
 | GET    | `/api/images` | List all Docker images |
+| POST   | `/api/images/pull` | Pull a Docker image |
 | GET    | `/api/images/{id}/inspect` | Get detailed information about an image including layers |
 | DELETE | `/api/images/{id}/delete` | Remove an image (with force and prune options) |
 | GET    | `/api/system/info` | Get Docker system information |
@@ -94,27 +104,27 @@ To pull a Docker image using the API:
 ```bash
 curl -X POST http://localhost:8080/api/images/pull \
   -H "Content-Type: application/json" \
-  -d '{"image": "nginx", "tag": "alpine"}'
+  -d '{"imageName": "nginx:alpine"}'
 ```
 
 Request body format:
 ```json
 {
-  "image": "ubuntu",  # Required: image name
-  "tag": "latest"     # Optional: defaults to "latest" if omitted
+  "imageName": "nginx:alpine"  # Required: image name with optional tag
 }
 ```
 
 ## Technologies Used
 
 - **Backend**:
-  - [Go](https://golang.org/)
-  - [Docker Engine API](https://docs.docker.com/engine/api/)
-  - [Gorilla Mux](https://github.com/gorilla/mux)
+  - [Go](https://golang.org/) (v1.23)
+  - [Docker Engine API](https://docs.docker.com/engine/api/) (v28.1.1)
+  - [Gorilla Mux](https://github.com/gorilla/mux) (v1.8.1)
+  - [Gorilla WebSocket](https://github.com/gorilla/websocket) (v1.5.3)
 
 - **Frontend**:
-  - [React](https://reactjs.org/)
-  - [Vite](https://vitejs.dev/)
+  - [React](https://reactjs.org/) (v19.1.0)
+  - [Vite](https://vitejs.dev/) (v6.3.5)
   - [Nginx](https://nginx.org/)
 
 - **DevOps**:
@@ -144,16 +154,26 @@ These HTML files serve as examples of how to integrate WebSocket connections wit
 ```
 harbory/
 ├── docker-compose.yml        # Docker Compose configuration
+├── index.html                # Container logs WebSocket demo
+├── pullimage.html            # Image pull WebSocket demo
 ├── harbory-backend/          # Go backend service
 │   ├── Dockerfile            # Backend Docker configuration
-│   ├── main.go               # Entry point
-│   ├── handlers/             # API route handlers
-│   │   ├── containers.go     # Container management handlers
-│   │   ├── images.go         # Image management handlers
-│   │   ├── logs.go           # WebSocket log streaming handlers
-│   │   └── system.go         # System information handlers
-│   ├── router/               # API route definitions
-│   └── utils/                # Utility functions
+│   ├── cmd/                  # Command-line applications
+│   │   └── harbory/          # Main application entry point
+│   │       └── main.go       # Main entry point
+│   ├── internal/             # Internal packages
+│   │   ├── api/              # API handlers
+│   │   │   ├── containers.go # Container API handlers
+│   │   │   ├── images.go     # Image API handlers
+│   │   │   ├── logs.go       # WebSocket log streaming
+│   │   │   └── system.go     # System information handlers
+│   │   ├── domain/           # Domain models and interfaces
+│   │   ├── repository/       # Data access layer
+│   │   ├── router/           # API route definitions
+│   │   ├── service/          # Business logic layer
+│   │   └── util/             # Utility functions
+│   └── pkg/                  # Public packages
+│       └── version/          # Version information
 ├── harbory-frontend/         # React frontend application
 │   ├── Dockerfile            # Frontend Docker configuration
 │   ├── public/               # Static assets
