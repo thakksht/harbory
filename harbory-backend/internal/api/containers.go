@@ -86,9 +86,9 @@ func (h *ContainerHandler) GetContainerLogs(w http.ResponseWriter, r *http.Reque
 
 	conn, err := h.upgrader.Upgrade(w, r, nil)
 	if err != nil {
+		conn.Close()
 		return
 	}
-	defer conn.Close()
 
 	options := container.LogsOptions{
 		ShowStdout: true,
