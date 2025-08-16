@@ -11,7 +11,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/preetindersinghbadesha/harbory/internal/api"
+	"github.com/preetindersinghbadesha/harbory/internal/api/http/handlers"
 	"github.com/preetindersinghbadesha/harbory/internal/config"
 )
 
@@ -20,10 +23,11 @@ func main() {
 	cfg := config.MustLoad()
 
 	// setup router
-	router := http.NewServeMux()
+	router := gin.Default()
 
 	// Health endpoints
-	router.HandleFunc("/api/health", api.HealthHandler())
+	router.GET("/api/health", api.HealthHandler())
+	router.GET("/api/images/all", handlers.GetAllImagesHandler())
 
 	// CORS middleware
 	corsHandler := func(next http.Handler) http.Handler {
@@ -49,7 +53,7 @@ func main() {
 
 	slog.Info("Server started", slog.String("address", cfg.HTTPServer.Addr))
 	fmt.Printf("server starting on http://%s\n", cfg.HTTPServer.Addr)
-	
+
 	// handle graceful shutdown
 	done := make(chan os.Signal, 1)
 	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
