@@ -1,0 +1,9 @@
+services:
+  harbory-backend:
+    build:
+      context: ./harbory-backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./harbory-backend:/app
