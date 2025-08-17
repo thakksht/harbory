@@ -36,3 +36,31 @@ func GetAllImagesHandler() gin.HandlerFunc {
 
 	}
 }
+
+func GetImageByParams() gin.HandlerFunc{
+	return func(c *gin.Context) {
+		cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+		if err != nil {
+			errorResp := response.GeneralErrorResponse(err)
+			_ = response.WriteJSONResponse(c.Writer, http.StatusInternalServerError, errorResp)
+			return
+		}
+		defer cli.Close()
+
+		imageID := c.Param("id")
+		image, _, err := cli.ImageInspectWithRaw(context.Background(), imageID)
+		if err != nil {
+			errorResp := response.GeneralErrorResponse(err)
+			_ = response.WriteJSONResponse(c.Writer, http.StatusInternalServerError, errorResp)
+			return
+		}
+
+		// Send image as JSON response
+		if err := response.WriteJSONResponse(c.Writer, http.StatusOK, image); err != nil {
+			errorResp := response.GeneralErrorResponse(err)
+			_ = response.WriteJSONResponse(c.Writer, http.StatusInternalServerError, errorResp)
+			return
+		}
+
+	}
+}

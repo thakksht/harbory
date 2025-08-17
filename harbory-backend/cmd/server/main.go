@@ -27,7 +27,10 @@ func main() {
 
 	// Health endpoints
 	router.GET("/api/health", api.HealthHandler())
+
+	// Image endpoints
 	router.GET("/api/images/all", handlers.GetAllImagesHandler())
+	router.GET("/api/images/:id", handlers.GetImageByParams())
 
 	// CORS middleware
 	corsHandler := func(next http.Handler) http.Handler {

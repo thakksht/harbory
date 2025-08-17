@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  # Build the Go binary from your cmd/server entrypoint
+  cmd = "go build -o ./tmp/main.exe ./cmd/server"
+  bin = "tmp/main.exe"
+  include_ext = ["go", "tpl", "tmpl", "html", "yaml"]
+  exclude_dir = ["tmp", "vendor"]
+  args_bin = ["--config", "./config/local.yaml"]
+
+[log]
+  time = true
+
+
+  
