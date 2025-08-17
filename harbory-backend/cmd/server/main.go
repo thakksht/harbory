@@ -28,6 +28,10 @@ func main() {
 	// Health endpoints
 	router.GET("/api/health", api.HealthHandler())
 
+	// Container endpoints
+	router.GET("/api/container/all", handlers.GetAllContainersHandler())
+	router.GET("/api/containers/:id", handlers.GetContainerByParams())
+
 	// Image endpoints
 	router.GET("/api/images/all", handlers.GetAllImagesHandler())
 	router.GET("/api/images/:id", handlers.GetImageByParams())
